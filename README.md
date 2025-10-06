@@ -44,7 +44,6 @@ cd tfe_fdo_aws_external_kubernetes/infra
 tag_prefix                 = "tfe70"                    # Prefix used for creating tags and names in AWS                               
 region                     = "eu-north-1"               # Region to create the kubernetes environment
 vpc_cidr                   = "10.114.0.0/16"            # Network for the VPC to be created
-rds_password               = "Password#1"               # Password used for the PostgreSQL environment
 k8s_min_size               = 1                          # autoscaling group minimal size.
 k8s_desired_size           = 1                          # autoscaling group desired capacity.
 k8s_max_size               = 2                          # autoscaling group maximum size.
@@ -116,7 +115,7 @@ Apply complete! Resources: 16 added, 0 changed, 0 destroyed.
 Outputs:
 
 tfe_instances_info = {
-  "primary" = {
+  "tfe71" = {
     "execute_script_to_create_user_admin" = "./configure_tfe.sh tfe71.aws.munnep.com patrick.munne@hashicorp.com Password#1"
     "minio_endpoint" = "http://tfe71-minio.terraform-enterprise.svc.cluster.local:9000"
     "minio_service_name" = "tfe71-minio"
