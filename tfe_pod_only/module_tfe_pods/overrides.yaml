@@ -1,0 +1,187 @@
+replicaCount: ${replica_count}
+image:
+  repository: images.releases.hashicorp.com
+  name: hashicorp/terraform-enterprise
+  tag: ${tfe_release}
+
+
+container:
+  securityContext:                  
+    allowPrivilegeEscalation: false 
+    capabilities:                   
+      drop:                         
+      - ALL                         
+    runAsNonRoot: true              
+    seccompProfile:                 
+      type: RuntimeDefault   
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1012
+
+
+
+
+
+
+
+
+
+resources:
+  requests:
+    memory: "2000Mi"
+    cpu: "2"
+  limits:
+    memory: "6000Mi"
+    cpu: "4"
+
+
+
+
+service:
+  annotations:
+    # service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"
+    # service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+  type: LoadBalancer # ClusterIP
+  # port: 443
+  # nodePort: 31227  
+
+
+# agentWorkerPodTemplate:
+#   metadata:
+#     labels:
+#       info: pod-template-info-hashicorp
+#   spec:
+#     containers:
+#     - securityContext:
+#         allowPrivilegeEscalation: false
+#         capabilities:
+#           drop:
+#           - ALL
+#         runAsNonRoot: true
+#         seccompProfile:
+#           type: RuntimeDefault
+#       image: patrickmunne3/custom-agent-openshift:latest
+#     securityContext:
+#       runAsNonRoot: true
+#       runAsUser: 1000
+      # fsGroup: 1012
+
+
+# agentWorkerPodTemplate:
+#   metadata:
+#     labels:
+#       app: pod-template-app-patrick
+#       info: pod-template-info-patrick
+#   spec:
+    # initContainers:
+    #   - name: check-before-start
+    #     image: busybox
+    #     command:
+    #       - sh
+    #       - -c
+    #       - |
+    #         echo "Wait 10 seconds before starting...";
+    #         sleep 10
+    #         echo "Wait 10 seconds finished...";
+    # imagePullSecrets:
+    # - name: my-registry-secret
+    # containers:
+    # - image: patrickmunne/custom-agent:v1.32
+    #   resources:
+    #     requests:
+    #       memory: "1000Mi"  
+    #       cpu: "1"     
+    #     limits:
+    #       memory: "1000Mi" 
+    #       cpu: "1"    
+      # env:
+      # - name: TFC_AGENT_LOG_LEVEL
+      #   value: TRACE
+
+# agentWorkerPodTemplate:
+#   spec:
+#     containers:
+#     - env:
+#       - name: TFC_AGENT_OTLP_ADDRESS
+#         value: otel-collector.terraform-enterprise-agents.svc.cluster.local:4317
+  # metadata:
+  #   labels:
+  #     app: pod-template-app-patrick
+  #     info: pod-template-info-patrick
+  #   annotations:
+  #     app: pod-template-app 
+  # spec:
+  #   hostAliases:
+  #   - ip: "127.0.0.1"
+  #     hostnames:
+  #     - "patrick.local"
+  #   nodeSelector:
+  #     kubernetes.io/hostname: ip-10-134-1-147.eu-north-1.compute.internal
+  #  serviceAccountName: default
+    # containers:
+    # - image: patrickmunne/custom-agent:latest
+    # - envFrom:
+    #   - secretRef:
+    #       name: builder-token-ht892   
+    # - volumeMounts:
+    #     # name must match the volume name below
+    #     - name: secret-volume
+    #       mountPath: /home/tfc-agent/secret-volume
+    #       readOnly: true
+    # volumes:
+    #   - name: secret-volume
+    #     secret:
+    #       secretName: builder-token-ht892                       
+#      securityContext:
+#        runAsNonRoot: false
+#        runAsUser: 1000
+#        runAsGroup: 3000
+#        fsGroup: 2000
+env:
+  variables:
+    # https_proxy: http://patrick:moeilijk@13.50.171.96:8080
+    # http_proxy: http://patrick:moeilijk@13.50.171.96:8080
+    # no_proxy: 127.0.0.1,localhost,aws.munnep.com,amazonaws.com,169.254.169.254,172.20.0.1
+    TFE_CAPACITY_CONCURRENCY: 10
+    TFE_CAPACITY_MEMORY: 4096
+    TFE_CAPACITY_CPU: 2
+    # TFE_RUN_PIPELINE_IMAGE: patrickmunne/custom-agent:latest
+    TFE_HOSTNAME: ${fqdn}
+    TFE_OPERATIONAL_MODE: active-active
+    TFE_DATABASE_HOST: ${pg_address}
+    TFE_DATABASE_NAME: ${pg_dbname}
+    TFE_DATABASE_USER: ${pg_user}
+    TFE_DATABASE_PARAMETERS: sslmode=disable
+    TFE_OBJECT_STORAGE_TYPE: s3
+    TFE_OBJECT_STORAGE_S3_BUCKET: ${s3_bucket}
+    TFE_OBJECT_STORAGE_S3_REGION: "justavalue"
+    TFE_OBJECT_STORAGE_S3_ACCESS_KEY_ID: ${s3_bucket_key}
+    TFE_OBJECT_STORAGE_S3_SECRET_ACCESS_KEY: ${s3_bucket_secret}
+    TFE_OBJECT_STORAGE_S3_ENDPOINT: ${s3_endpoint}
+    TFE_OBJECT_STORAGE_S3_USE_INSTANCE_PROFILE: false
+    TFE_ATLAS_REGISTRY_MONOREPO_TOGGLE_ENABLED: 1
+
+
+    TFE_RUN_PIPELINE_KUBERNETES_OPEN_SHIFT_ENABLED: "true"
+    
+    TFE_REDIS_HOST: ${redis_host}:${redis_port}
+    TFE_IACT_SUBNETS: "0.0.0.0/0"
+
+    # TFE_VAULT_CLUSTER_ADDRESS: http://{{GetAllInterfaces | include \"type\" \"ip\" | include \"flags\" \"up\" | exclude \"flags\" \"loopback\" |  sort \"default,type,size\" | include \"RFC\" \"6890\" | attr \"address\" }}:8201
+
+  # secretRefs:
+  #   - name: patrick
+  secrets:
+    TFE_DATABASE_PASSWORD: ${pg_password}
+    TFE_ENCRYPTION_PASSWORD:  ${enc_password}
+    TFE_LICENSE: ${tfe_license} 
+
+tls:
+  certData: ${cert_data}
+  keyData: ${key_data}
+  caCertData: ${ca_cert_data}
+
+
+  
